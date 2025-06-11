@@ -88,7 +88,6 @@ def create_sample_config(config_path: str):
         print(f"\n[!] Error creating sample config: {str(e)}")
 
 class EnhancedLogger:
-    """Enhanced logging with rotation and size management"""
     def __init__(self):
         self.logger = logging.getLogger('FIM_Enhanced')
         self.logger.setLevel(logging.INFO)
@@ -127,12 +126,12 @@ class EnhancedLogger:
             return str(log_path)
         except Exception as e:
             print(f"Couldn't access log location {log_path}: {str(e)}")
-            return 'fim_enhanced.log'  # Fallback to local directory
+            return 'fim_enhanced.log'
 
     def _parse_size(self, size_str: str) -> int:
         size_str = size_str.upper().strip()
         if not size_str:
-            return 10 * 1024 * 1024  # Default 10MB
+            return 10 * 1024 * 1024
         
         match = re.match(r'^(\d+)\s*([KMG]?B?)?$', size_str)
         if not match:
@@ -147,7 +146,7 @@ class EnhancedLogger:
             return number * 1024 * 1024
         elif unit.startswith('G'):
             return number * 1024 * 1024 * 1024
-        else:  # bytes
+        else:
             return number
 
 logger = EnhancedLogger().logger
@@ -155,6 +154,7 @@ logger = EnhancedLogger().logger
 class FileIntegrityDatabase:
     def __init__(self, baseline_file: str = None):
         base_dir = Path(os.environ.get('PROGRAMDATA', Path.home()))
+        
         if baseline_file is None:
             self.baseline_file = str(base_dir / 'baseline.fim')
         else:
@@ -174,6 +174,7 @@ class FileIntegrityDatabase:
                     'timestamp': time.time(),
                     'data': data
                 }, f)
+            
             Path(temp_file).replace(self.baseline_file)
             logger.info(f"Successfully saved baseline to {self.baseline_file}")
             return True
@@ -201,9 +202,7 @@ class FileIntegrityDatabase:
             raise ValueError("Corrupted baseline file")
 
 class RealTimeFileIntegrityMonitor:
-    
-   def __init__(self, config_file: str = None):
-        """Initialize the monitor with configuration"""
+    def __init__(self, config_file: str = None):
         self.config_file = config_file or "fim_config.json"
         self.config = self._load_config()
         self.monitored_dirs = self._resolve_paths(self.config["monitored_directories"])
@@ -293,7 +292,7 @@ class RealTimeFileIntegrityMonitor:
             str(Path.home() / "Documents"),
             str(Path.home() / "Desktop"),
             str(Path.home() / "Downloads"),
-            str(Path.cwd()) 
+            str(Path.cwd())
         ]
         
         logger.info("\nSuggested directories that exist and are accessible:")
