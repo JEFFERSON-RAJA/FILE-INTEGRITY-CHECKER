@@ -26,7 +26,6 @@ try:
 except ImportError:
     HAS_WATCHDOG = False
 
-# Constants
 DEFAULT_CONFIG = {
     "monitored_directories": [
         str(Path.home() / "Documents"),
@@ -53,7 +52,6 @@ DEFAULT_CONFIG = {
 }
 
 def console_event_callback(event):
-    """Formatted console output callback"""
     event_type = event['type'].upper()
     path = event['path']
     timestamp = event['timestamp']
@@ -79,7 +77,6 @@ def console_event_callback(event):
     print(message)
 
 def create_sample_config(config_path: str):
-    """Create sample configuration file with formatted output"""
     sample_config = DEFAULT_CONFIG.copy()
     try:
         with open(config_path, 'w') as f:
@@ -98,7 +95,6 @@ class EnhancedLogger:
         self._setup_handlers()
 
     def _setup_handlers(self):
-        """Configure logging handlers with rotation"""
         log_path = self._get_log_path()
         
         file_handler = logging.handlers.RotatingFileHandler(
@@ -123,7 +119,6 @@ class EnhancedLogger:
         self.logger.addHandler(console_handler)
 
     def _get_log_path(self) -> str:
-        """Determine optimal log file location"""
         log_dir = Path(os.environ.get('PROGRAMDATA', Path.home()))
         log_path = log_dir / 'fim_enhanced.log'
         
@@ -135,7 +130,6 @@ class EnhancedLogger:
             return 'fim_enhanced.log'  # Fallback to local directory
 
     def _parse_size(self, size_str: str) -> int:
-        """Convert size string (e.g., '10MB') to bytes"""
         size_str = size_str.upper().strip()
         if not size_str:
             return 10 * 1024 * 1024  # Default 10MB
@@ -159,13 +153,8 @@ class EnhancedLogger:
 logger = EnhancedLogger().logger
 
 class FileIntegrityDatabase:
-    """Enhanced baseline storage with compression and versioning"""
     def __init__(self, baseline_file: str = None):
-        """Initialize the database with proper path handling"""
-        # Get the appropriate base directory (PROGRAMDATA on Windows or user home)
         base_dir = Path(os.environ.get('PROGRAMDATA', Path.home()))
-        
-        # Set baseline file path
         if baseline_file is None:
             self.baseline_file = str(base_dir / 'baseline.fim')
         else:
@@ -175,10 +164,8 @@ class FileIntegrityDatabase:
         self.lock = threading.Lock()
 
     def save(self, data: Dict[str, Any]) -> bool:
-        """Save baseline with compression and atomic write"""
         temp_file = f"{self.baseline_file}.tmp"
         try:
-            # Ensure parent directory exists
             Path(self.baseline_file).parent.mkdir(parents=True, exist_ok=True)
             
             with self.lock, gzip.open(temp_file, 'wb') as f:
@@ -187,8 +174,6 @@ class FileIntegrityDatabase:
                     'timestamp': time.time(),
                     'data': data
                 }, f)
-            
-            # Atomic rename
             Path(temp_file).replace(self.baseline_file)
             logger.info(f"Successfully saved baseline to {self.baseline_file}")
             return True
@@ -201,7 +186,6 @@ class FileIntegrityDatabase:
             return False
 
     def load(self) -> Tuple[Dict[str, Any], float]:
-        """Load baseline with version checking"""
         try:
             with self.lock, gzip.open(self.baseline_file, 'rb') as f:
                 content = pickle.load(f)
@@ -217,9 +201,8 @@ class FileIntegrityDatabase:
             raise ValueError("Corrupted baseline file")
 
 class RealTimeFileIntegrityMonitor:
-    """Enhanced File Integrity Monitor with performance optimizations"""
     
-    def __init__(self, config_file: str = None):
+   def __init__(self, config_file: str = None):
         """Initialize the monitor with configuration"""
         self.config_file = config_file or "fim_config.json"
         self.config = self._load_config()
@@ -241,13 +224,10 @@ class RealTimeFileIntegrityMonitor:
         logger.debug(f"Configuration: {json.dumps(self.config, indent=2)}")
 
     def _resolve_paths(self, paths: List[str]) -> List[str]:
-        """Resolve and normalize all paths"""
         resolved = []
         for path in paths:
             try:
-                # Expand environment variables and user home (~)
                 expanded_path = os.path.expandvars(os.path.expanduser(path))
-                # Convert to absolute path and normalize
                 abs_path = str(Path(expanded_path).absolute())
                 resolved.append(abs_path)
             except Exception as e:
@@ -255,7 +235,6 @@ class RealTimeFileIntegrityMonitor:
         return resolved
 
     def _load_config(self) -> Dict[str, Any]:
-        """Load and validate configuration with defaults"""
         config = DEFAULT_CONFIG.copy()
         
         try:
@@ -268,7 +247,6 @@ class RealTimeFileIntegrityMonitor:
             else:
                 logger.warning(f"Config file not found at {self.config_file}, using defaults")
                 
-            # Ensure all paths in config are strings
             config["monitored_directories"] = [str(p) for p in config["monitored_directories"]]
             return config
         except Exception as e:
@@ -277,7 +255,6 @@ class RealTimeFileIntegrityMonitor:
             return DEFAULT_CONFIG.copy()
 
     def _validate_directories(self):
-        """Validate monitored directories with helpful feedback"""
         valid_dirs = []
         
         if not self.monitored_dirs:
@@ -312,12 +289,11 @@ class RealTimeFileIntegrityMonitor:
         self.monitored_dirs = valid_dirs
 
     def _suggest_default_directories(self):
-        """Suggest default directories that would work"""
         potential_dirs = [
             str(Path.home() / "Documents"),
             str(Path.home() / "Desktop"),
             str(Path.home() / "Downloads"),
-            str(Path.cwd())  # Current working directory
+            str(Path.cwd()) 
         ]
         
         logger.info("\nSuggested directories that exist and are accessible:")
@@ -330,19 +306,16 @@ class RealTimeFileIntegrityMonitor:
                 continue
 
     def is_excluded(self, filepath: str) -> bool:
-        """Optimized exclusion check with caching"""
         filepath = str(Path(filepath))
         return any(fnmatch.fnmatch(filepath, pattern) 
                   for pattern in self.excluded_patterns)
 
     def has_allowed_extension(self, filepath: str) -> bool:
-        """Optimized extension check"""
         if not self.allowed_extensions:
             return True
         return Path(filepath).suffix.lower() in self.allowed_extensions
 
     def calculate_hash(self, filepath: str, algorithm: str = None) -> Optional[str]:
-        """Optimized hash calculation with progress reporting"""
         algorithm = algorithm or self.config["default_hash_algorithm"]
         if algorithm not in hashlib.algorithms_available:
             logger.error(f"Unsupported hash algorithm: {algorithm}")
@@ -369,7 +342,6 @@ class RealTimeFileIntegrityMonitor:
             return None
 
     def get_file_metadata(self, filepath: str) -> Dict[str, Any]:
-        """Enhanced metadata collection with security attributes"""
         try:
             stat_info = os.stat(filepath)
             metadata = {
@@ -403,7 +375,6 @@ class RealTimeFileIntegrityMonitor:
             return {}
 
     def create_baseline(self) -> Dict[str, Dict[str, Any]]:
-        """Parallel baseline creation with progress tracking"""
         from concurrent.futures import ThreadPoolExecutor, as_completed
         
         baseline = {}
@@ -457,7 +428,6 @@ class RealTimeFileIntegrityMonitor:
             raise
 
     def verify_integrity(self) -> Dict[str, Any]:
-        """Enhanced integrity verification with anomaly detection"""
         try:
             baseline, baseline_time = self.db.load()
             logger.info(f"Baseline created at: {datetime.fromtimestamp(baseline_time).isoformat()}")
@@ -531,7 +501,6 @@ class RealTimeFileIntegrityMonitor:
         return issues
 
     def _check_file(self, filepath: str) -> Optional[Tuple[str, Dict]]:
-        """Check a single file (worker function for parallel processing)"""
         if self.is_excluded(filepath) or not self.has_allowed_extension(filepath):
             return None
             
@@ -545,7 +514,6 @@ class RealTimeFileIntegrityMonitor:
         })
 
     def _compare_file_states(self, old: Dict, new: Dict) -> Dict[str, Any]:
-        """Compare file states and return detected changes"""
         changes = {}
         
         if old['hash'] != new['hash']:
@@ -579,7 +547,6 @@ class RealTimeFileIntegrityMonitor:
         return changes
 
     def _check_mass_deletion(self, count: int):
-        """Check for mass deletion events"""
         threshold = self.alert_thresholds.get('mass_deletion', 5)
         if count >= threshold:
             self.suspicious_activity['mass_deletion'] += 1
@@ -594,7 +561,6 @@ class RealTimeFileIntegrityMonitor:
             })
 
     def start_real_time_monitoring(self, poll_interval: int = 60) -> None:
-        """Enhanced real-time monitoring with graceful shutdown"""
         signal.signal(signal.SIGINT, self._handle_signal)
         signal.signal(signal.SIGTERM, self._handle_signal)
         
@@ -606,7 +572,6 @@ class RealTimeFileIntegrityMonitor:
             self._start_polling_monitoring(poll_interval)
 
     def _handle_signal(self, signum, frame):
-        """Handle shutdown signals gracefully"""
         logger.info(f"Received signal {signum}, shutting down...")
         self.shutdown_flag.set()
         
@@ -614,7 +579,6 @@ class RealTimeFileIntegrityMonitor:
             self.observer.stop()
 
     def _start_watchdog_monitoring(self) -> None:
-        """Enhanced watchdog monitoring with event buffering"""
         class EnhancedEventHandler(FileSystemEventHandler):
             def __init__(self, parent):
                 self.parent = parent
@@ -670,7 +634,6 @@ class RealTimeFileIntegrityMonitor:
             self.observer.join()
 
     def _start_polling_monitoring(self, interval: int) -> None:
-        """Enhanced polling with adaptive intervals"""
         logger.info(f"Starting enhanced polling (interval: {interval}s)")
         
         try:
@@ -700,7 +663,6 @@ class RealTimeFileIntegrityMonitor:
             logger.info("Monitoring stopped")
 
     def _handle_file_event(self, filepath: str, event_type: str):
-        """Handle individual file events"""
         if self.is_excluded(filepath) or not self.has_allowed_extension(filepath):
             return
             
@@ -718,13 +680,11 @@ class RealTimeFileIntegrityMonitor:
                 logger.error(f"Error processing {event_type} event for {filepath}: {str(e)}")
 
     def register_callback(self, callback: Callable) -> None:
-        """Thread-safe callback registration"""
         with self.lock:
             self.event_callbacks.append(callback)
             logger.debug(f"Registered callback: {callback.__name__}")
 
     def notify_callbacks(self, event_type: str, path: str, details: Dict = None) -> None:
-        """Thread-safe callback notification"""
         details = details or {}
         event = {
             'timestamp': datetime.now().isoformat(),
@@ -742,7 +702,6 @@ class RealTimeFileIntegrityMonitor:
                     logger.error(f"Callback error: {str(e)}")
 
     def report_issues(self, issues: Dict[str, Any]):
-        """Enhanced text report formatting for integrity issues"""
         report_lines = []
         timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
         
@@ -800,7 +759,6 @@ class RealTimeFileIntegrityMonitor:
         print("\n".join(report_lines))
 
 def main():
-    """Enhanced main function with better error handling"""
     parser = argparse.ArgumentParser(
         description="Enhanced File Integrity Monitor",
         formatter_class=argparse.ArgumentDefaultsHelpFormatter
@@ -832,7 +790,6 @@ def main():
             create_sample_config(config_path)
             return
         
-        # Handle directory specification
         if args.directories:
             DEFAULT_CONFIG["monitored_directories"] = args.directories
             logger.info(f"Using command-line directories: {args.directories}")
