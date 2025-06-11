@@ -23,7 +23,6 @@ Hashing Algorithms
 3.Parallel processing for improved performance
 
 Baseline Management
-
 1.Creates compressed snapshots of file states
 2.Stores file hashes with metadata (size, timestamps, permissions)
 3.Version-controlled baseline format
