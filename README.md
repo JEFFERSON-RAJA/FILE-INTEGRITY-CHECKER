@@ -10,35 +10,29 @@ DURATION : 4 WEEKS
 
 MENTOR : NEELA SANTHOSH
 
+DESCRIPTION
+
 File Integrity Checker
 This Python script provides a comprehensive file integrity checking solution by monitoring file changes through cryptographic hashing and metadata comparison.
 
 Core Functionality
+
 Hashing Algorithms
-Supports multiple hash algorithms (SHA-256 by default)
-
-Efficient hash calculation with progress reporting
-
-Parallel processing for improved performance
+1.Supports multiple hash algorithms (SHA-256 by default)
+2.efficient hash calculation with progress reporting
+3.Parallel processing for improved performance
 
 Baseline Management
-Creates compressed snapshots of file states
 
-Stores file hashes with metadata (size, timestamps, permissions)
-
-Version-controlled baseline format
-
-Atomic write operations for data safety
+1.Creates compressed snapshots of file states
+2.Stores file hashes with metadata (size, timestamps, permissions)
+3.Version-controlled baseline format
+4.Atomic write operations for data safety
 
 Integrity Verification
-Compares current file states against baseline
-
-Detects:
-
-Content changes (via hash comparison)
-
-Metadata modifications (size, timestamps)
-
-Permission changes
-
-New/deleted file
+1.Compares current file states against baseline
+2.Detects:
+ 1.Content changes (via hash comparison)
+ 2.Metadata modifications (size, timestamps)
+ 3.Permission changes
+ 4.New/deleted files
