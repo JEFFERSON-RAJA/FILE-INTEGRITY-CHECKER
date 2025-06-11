@@ -9,3 +9,36 @@ DOMAIN : Cyber Security & Ethical Hacking
 DURATION : 4 WEEKS
 
 MENTOR : NEELA SANTHOSH
+
+File Integrity Checker
+This Python script provides a comprehensive file integrity checking solution by monitoring file changes through cryptographic hashing and metadata comparison.
+
+Core Functionality
+Hashing Algorithms
+Supports multiple hash algorithms (SHA-256 by default)
+
+Efficient hash calculation with progress reporting
+
+Parallel processing for improved performance
+
+Baseline Management
+Creates compressed snapshots of file states
+
+Stores file hashes with metadata (size, timestamps, permissions)
+
+Version-controlled baseline format
+
+Atomic write operations for data safety
+
+Integrity Verification
+Compares current file states against baseline
+
+Detects:
+
+Content changes (via hash comparison)
+
+Metadata modifications (size, timestamps)
+
+Permission changes
+
+New/deleted file
