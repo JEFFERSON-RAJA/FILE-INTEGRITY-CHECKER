@@ -35,3 +35,8 @@ Integrity Verification
  ,Metadata modifications (size, timestamps)
  ,Permission changes
  ,New/deleted files
+
+
+#OUTPUT:
+
+![Image](https://github.com/user-attachments/assets/d8dbe802-7c2a-4896-88ce-8aff7a236d62)
